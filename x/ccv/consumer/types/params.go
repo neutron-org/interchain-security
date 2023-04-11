@@ -35,6 +35,9 @@ const (
 	// than the default unbonding period on the provider, where the provider uses
 	// the staking module default.
 	DefaultConsumerUnbondingPeriod = stakingtypes.DefaultUnbondingTime - 24*time.Hour
+
+	// By default, the bottom 5% of the validator set can opt out of validating consumer chains
+	DefaultSoftOptOutThreshold = "0.05"
 )
 
 // Reflection based keys for params subspace
@@ -47,6 +50,7 @@ var (
 	KeyConsumerRedistributionFrac        = []byte("ConsumerRedistributionFraction")
 	KeyHistoricalEntries                 = []byte("HistoricalEntries")
 	KeyConsumerUnbondingPeriod           = []byte("UnbondingPeriod")
+	KeySoftOptOutThreshold               = []byte("SoftOptOutThreshold")
 )
 
 // ParamKeyTable type declaration for parameters
@@ -59,7 +63,7 @@ func NewParams(enabled bool, blocksPerDistributionTransmission int64,
 	distributionTransmissionChannel, providerFeePoolAddrStr string,
 	ccvTimeoutPeriod time.Duration, transferTimeoutPeriod time.Duration,
 	consumerRedistributionFraction string, historicalEntries int64,
-	consumerUnbondingPeriod time.Duration,
+	consumerUnbondingPeriod time.Duration, softOptOutThreshold string,
 ) Params {
 	return Params{
 		Enabled:                           enabled,
@@ -71,6 +75,7 @@ func NewParams(enabled bool, blocksPerDistributionTransmission int64,
 		ConsumerRedistributionFraction:    consumerRedistributionFraction,
 		HistoricalEntries:                 historicalEntries,
 		UnbondingPeriod:                   consumerUnbondingPeriod,
+		SoftOptOutThreshold:               softOptOutThreshold,
 	}
 }
 
@@ -86,6 +91,7 @@ func DefaultParams() Params {
 		DefaultConsumerRedistributeFrac,
 		DefaultHistoricalEntries,
 		DefaultConsumerUnbondingPeriod,
+		DefaultSoftOptOutThreshold,
 	)
 }
 
@@ -118,6 +124,9 @@ func (p Params) Validate() error {
 	if err := ccvtypes.ValidateDuration(p.UnbondingPeriod); err != nil {
 		return err
 	}
+	if err := ccvtypes.ValidateStringFraction(p.SoftOptOutThreshold); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -141,6 +150,8 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 			p.HistoricalEntries, ccvtypes.ValidatePositiveInt64),
 		paramtypes.NewParamSetPair(KeyConsumerUnbondingPeriod,
 			p.UnbondingPeriod, ccvtypes.ValidateDuration),
+		paramtypes.NewParamSetPair(KeySoftOptOutThreshold,
+			p.SoftOptOutThreshold, ccvtypes.ValidateStringFraction),
 	}
 }
 
