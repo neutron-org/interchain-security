@@ -1,8 +1,10 @@
 package types
 
 import (
+	"fmt"
 	time "time"
 
+	sdktypes "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ccvtypes "github.com/cosmos/interchain-security/x/ccv/types"
@@ -124,7 +126,7 @@ func (p Params) Validate() error {
 	if err := ccvtypes.ValidateDuration(p.UnbondingPeriod); err != nil {
 		return err
 	}
-	if err := ccvtypes.ValidateStringFraction(p.SoftOptOutThreshold); err != nil {
+	if err := validateSoftOptOutThreshold(p.SoftOptOutThreshold); err != nil {
 		return err
 	}
 	return nil
@@ -171,4 +173,26 @@ func validateProviderFeePoolAddrStr(i interface{}) error {
 	}
 	// Otherwise validate as usual for a bech32 address
 	return ccvtypes.ValidateBech32(i)
+}
+
+func validateSoftOptOutThreshold(i interface{}) error {
+	value, ok := i.(string)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if err := ccvtypes.ValidateStringFraction(value); err != nil {
+		return err
+	}
+
+	t, err := sdktypes.NewDecFromStr(value)
+	if err != nil {
+		return err
+	}
+
+	if t.GTE(sdktypes.NewDec(1)) {
+		return fmt.Errorf("SoftOptOutThreshold must be less than 1")
+	}
+
+	return nil
 }
