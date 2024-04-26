@@ -240,7 +240,7 @@ func (k Keeper) MakeConsumerGenesis(
 	clientState.TrustingPeriod = trustPeriod
 	clientState.UnbondingPeriod = providerUnbondingPeriod
 
-	consState, err := k.clientKeeper.GetSelfConsensusState(ctx, height)
+	consState, err := k.clientKeeper.GetSelfConsensusState(ctx, height,clientState.ClientType())
 	if err != nil {
 		return gen, nil, errorsmod.Wrapf(clienttypes.ErrConsensusStateNotFound, "error %s getting self consensus state for: %s", err, height)
 	}

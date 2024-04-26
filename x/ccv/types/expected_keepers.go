@@ -100,7 +100,7 @@ type ClientKeeper interface {
 	CreateClient(ctx sdk.Context, clientState ibcexported.ClientState, consensusState ibcexported.ConsensusState) (string, error)
 	GetClientState(ctx sdk.Context, clientID string) (ibcexported.ClientState, bool)
 	GetLatestClientConsensusState(ctx sdk.Context, clientID string) (ibcexported.ConsensusState, bool)
-	GetSelfConsensusState(ctx sdk.Context, height ibcexported.Height) (ibcexported.ConsensusState, error)
+	GetSelfConsensusState(ctx sdk.Context, height ibcexported.Height,clientType string) (ibcexported.ConsensusState, error)
 	ClientStore(ctx sdk.Context, clientID string) storetypes.KVStore
 	SetClientState(ctx sdk.Context, clientID string, clientState ibcexported.ClientState)
 	GetClientConsensusState(ctx sdk.Context, clientID string, height ibcexported.Height) (ibcexported.ConsensusState, bool)
